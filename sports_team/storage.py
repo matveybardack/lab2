@@ -155,3 +155,75 @@ def export_to_xlsx(teams: List[Team], output_filename: str = "report.xlsx"):
             ])
 
     wb.save(output_filename)
+
+def get_player_by_name(name: str, db_path: str = DB_NAME) -> Optional[Player]:
+    with get_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT name, position, matches, goals, assists, penalty_minutes
+            FROM players
+            WHERE name = ?;
+        """, (name,))
+        row = cursor.fetchone()
+        if row:
+            return Player(
+                name=row[0],
+                position=row[1],
+                matches=row[2],
+                goals=row[3],
+                assists=row[4],
+                penalty_minutes=row[5]
+            )
+        return None
+
+
+def get_all_teams_with_players(db_path: str = DB_NAME) -> List[Team]:
+    teams_dict = {}
+    with get_connection(db_path) as conn:
+        cursor = conn.cursor()
+        # Извлечение всех команд
+        cursor.execute("SELECT id, name, wins, draws, losses, goals_for, goals_against FROM teams;")
+        teams_rows = cursor.fetchall()
+        for t_row in teams_rows:
+            team_id, name, wins, draws, losses, g_for, g_against = t_row
+            team = Team(
+                name=name,
+                wins=wins,
+                draws=draws,
+                losses=losses,
+                goals_for=g_for,
+                goals_against=g_against
+            )
+            teams_dict[team_id] = team
+
+        # Извлечение всех игроков и привязка к командам
+        cursor.execute("SELECT name, position, matches, goals, assists, penalty_minutes, team_id FROM players;")
+        players_rows = cursor.fetchall()
+        for p_row in players_rows:
+            p_name, pos, matches, goals, assists, penalty, t_id = p_row
+            player = Player(
+                name=p_name,
+                position=pos,
+                matches=matches,
+                goals=goals,
+                assists=assists,
+                penalty_minutes=penalty
+            )
+            if t_id in teams_dict:
+                teams_dict[t_id].add_player(player)
+
+    return list(teams_dict.values())
+
+def get_or_create_team_id(team_name: str, db_path: str = DB_NAME):
+    """Возвращает ID команды по названию. Если команда отсутствует в БД, создает новую."""
+    with get_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM teams WHERE name = ?;", (team_name,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        
+        # Если команда не найдена — создаем новую
+        cursor.execute("INSERT INTO teams (name) VALUES (?);", (team_name,))
+        conn.commit()
+        return cursor.lastrowid

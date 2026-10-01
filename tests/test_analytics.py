@@ -1,4 +1,10 @@
 import pytest
+
+import sys
+from pathlib import Path
+# Добавляем корень проекта в sys.path для корректного импорта
+sys.path.append(str(Path(__file__).parent.parent))
+
 from sports_team.models import Player, Team, Match
 from sports_team.calculator import (
     calculate_player_avg_goals,
