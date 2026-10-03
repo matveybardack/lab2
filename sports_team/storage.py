@@ -215,7 +215,6 @@ def get_all_teams_with_players(db_path: str = DB_NAME) -> List[Team]:
     return list(teams_dict.values())
 
 def get_or_create_team_id(team_name: str, db_path: str = DB_NAME):
-    """Возвращает ID команды по названию. Если команда отсутствует в БД, создает новую."""
     with get_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM teams WHERE name = ?;", (team_name,))

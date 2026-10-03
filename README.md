@@ -10,8 +10,29 @@
   - `cli.py` — CLI-интерфейс на базе `argparse`
 - `tests/` — модульные тесты (`pytest`)
 - `main.py` — точка входа
-- `CLI_COMMANDS.md` — подробный справочник команд CLI
 
+## Доступные команды
+### 1. Добавление сущностей
+* **Добавить команду:**
+  `python main.py add-team --name "Lions"`
+* **Добавить игрока:**
+  `python main.py add-player --name "Ivanov" --team "Lions" --goals 10 --assists 5 --penalty 4`
+* **Записать результат матча:**
+  `python main.py add-match --team1 "Lions" --team2 "Tigers" --score "3:1"`
+### 2. Расчет и просмотр статистики
+* **Статистика игрока:**
+  `python main.py stats-player --name "Ivanov"`
+* **Турнирная таблица и статистика команд:**
+  `python main.py stats-tournament`
+### 3. Экспорт данных
+* **Экспорт отчёта в DOCX:**
+  `python main.py export --format docx --output report.docx`
+* **Экспорт отчёта в Excel (XLSX):**
+  `python main.py export --format xlsx --output report.xlsx`
+### 4. Вспомогательные команды
+* **Справка по командам:**
+  `python main.py --help`
+  
 ## Быстрый запуск в virtualenv (venv)
 
 1. **Создание и активация виртуального окружения:**
